@@ -543,6 +543,146 @@ cd /path/to/project && claude
 
 ---
 
+## 上下文管理与 Token 优化
+
+### 双重 Token 消耗问题
+
+当技术负责人调用 Claude Code 时，存在双重上下文消耗：
+- **外层（我）**: 理解 PRD、协调流程、管理项目状态
+- **内层（Claude Code）**: 代码生成、调试、重构
+
+**风险**: 项目越大，两者的上下文越长，叠加后 token 消耗过大。
+
+### 优化策略
+
+#### 1. 项目结构拆分（模块化管理）
+
+**避免单一大仓库，按业务模块拆分：**
+
+```
+projects/
+├── emotion-first-aid/           # 情绪急救室主项目
+│   ├── app-core/               # 核心功能（导航、状态管理）
+│   ├── module-breathing/       # 呼吸模块（独立子项目）
+│   ├── module-mood/            # 情绪记录模块（独立子项目）
+│   ├── module-community/       # 社区模块（独立子项目）
+│   └── shared/                 # 共享组件库
+```
+
+**好处**：
+- 每个子项目上下文独立
+- 按需只启动特定模块的 Claude Code
+- 并行开发不冲突
+
+#### 2. CLAUDE.md 架构文档规范
+
+**原则：Claude Code 自己读取架构，我不传递**
+
+**项目必须包含 CLAUDE.md**：
+```markdown
+# CLAUDE.md - 项目架构文档
+
+## 项目概述
+- 项目名称: 
+- 技术栈: 
+- 主要功能: 
+
+## 目录结构
+```
+
+## 核心模块
+- 模块A: 职责说明
+- 模块B: 职责说明
+
+## 开发规范
+- 代码规范: 
+- 测试规范: 
+- 提交规范: 
+```
+
+**如果没有 CLAUDE.md**：
+```bash
+# 在 Claude Code 中生成
+claude
+> /init
+# Claude Code 会自动分析项目结构并生成 CLAUDE.md
+```
+
+#### 3. Git Worktree 隔离开发
+
+**使用 Superpowers 的 Git Worktree 技能或手动创建：**
+
+```bash
+# 为每个功能创建独立工作区
+cd /projects/emotion-first-aid
+
+# 创建 worktree（基于 develop 分支）
+git worktree add ../worktrees/feature-login develop
+cd ../worktrees/feature-login
+
+# 在此环境下启动 Claude Code
+claude
+```
+
+**好处**：
+- Claude Code 只看到当前功能的代码
+- 不影响主分支
+- 完成后合并即可
+- 可随时删除 worktree
+
+#### 4. 上下文裁剪规范
+
+**我传递给 Claude Code 的最小上下文**：
+
+```yaml
+必需:
+  - 任务描述（1-2句话）
+  - 相关 PRD 片段（仅当前功能）
+  - 接口定义（如有）
+
+不包含:
+  - 其他模块的代码
+  - 历史版本信息
+  - 全局架构文档（Claude Code 自己读 CLAUDE.md）
+```
+
+### Claude Code 调用优化
+
+**标准调用方式（推荐）**：
+
+```bash
+# 1. 进入模块目录（不是主项目根目录）
+cd /projects/emotion-first-aid/module-breathing
+
+# 2. 确保有 CLAUDE.md（没有则生成）
+ls CLAUDE.md || echo "需要生成架构文档"
+
+# 3. 启动 Claude Code（它会自己读 CLAUDE.md）
+claude
+
+# 4. 只传递简洁任务描述
+> "实现呼吸引导页面的动画效果，参考 PRD 第3.2节"
+```
+
+**分层职责**：
+
+| 层级 | 我的职责 | Claude Code 职责 | 上下文控制 |
+|------|----------|------------------|------------|
+| **架构层** | 决策模块划分 | 读取 CLAUDE.md 理解架构 | 我不传递架构文档 |
+| **模块层** | 指定当前模块 | 读取模块代码实现功能 | 仅该模块上下文 |
+| **调试层** | 定位问题范围 | 在子项目内调试 | 仅相关文件 |
+
+### Token 优化检查清单
+
+启动 Claude Code 前检查：
+- [ ] 是否进入了正确的子模块目录？
+- [ ] 该目录是否有 CLAUDE.md？（没有则先用 /init 生成）
+- [ ] 是否使用了 Git Worktree 隔离？
+- [ ] 传递给 Claude Code 的任务描述是否简洁？（<100字）
+- [ ] 是否只包含了当前任务的 PRD 片段？
+
+---
+
 ## 技能分工原则
 
 ### 设计决策权归属
@@ -602,72 +742,99 @@ cd /path/to/project && claude
 
 ### 技能调用流程示例
 
-**场景A: 标准开发流程（简单功能）**
+**场景A: 标准开发流程（简单功能，Token 优化版）**
 ```
 1. 产品经理交付PRD（含设计规范）和设计稿
    ↓
-2. 审阅PRD中的技术需求（不评估设计，只评估技术可行性）
+2. 审阅PRD，确定开发模块（如 module-breathing）
    ↓
-3. 输出技术方案文档
+3. 【Token 优化】创建 Git Worktree 隔离环境
+   │   └── git worktree add ../worktrees/feature-xxx develop
+   │   └── cd ../worktrees/feature-xxx
    ↓
-4. 调用 fullstack-developer 实现主体功能
+4. 【Token 优化】确保 CLAUDE.md 存在
+   │   └── ls CLAUDE.md || claude > /init
    ↓
-5. 【日常开发/调试】启动 Claude Code 进行代码开发
-   │   └── cd /project && claude
+5. 输出技术方案文档（仅当前模块范围）
    ↓
-6. 【如需复杂UI效果】调用 frontend-design-3 实现视觉效果
+6. 【Token 优化】启动 Claude Code（简洁调用）
+   │   └── cd ../worktrees/feature-xxx && claude
+   │   └── > "实现呼吸引导页面动画，参考 PRD 3.2节"
+   │   
+   │   【Claude Code 自己会读取 CLAUDE.md 理解架构】
+   │   【我只传递任务描述，不传递完整上下文】
    ↓
-7. 【如需Flutter优化】调用 flutter 进行专项优化
+7. 【如需复杂UI效果】调用 frontend-design-3 实现视觉效果
    ↓
-8. 【如需代码审查】调用 code-reviewer-pro 进行质量检查
+8. 【如需Flutter优化】调用 flutter 进行专项优化
+   ↓
+9. 【如需代码审查】调用 code-reviewer-pro 进行质量检查
    │   ├── 安全审查: security 命令
    │   ├── 复杂度分析: complexity 命令
    │   └── 通用审查: review 命令
    ↓
-9. 修复审查发现的问题
+10. 修复审查发现的问题
    ↓
-10. 自测 + 编写单元测试
+11. 自测 + 编写单元测试
    ↓
-11. 提交PR，调用 github 管理合并
+12. 提交PR，调用 github 管理合并
    ↓
-12. 调用 git 打标签、发布
+13. 清理 worktree: git worktree remove ../worktrees/feature-xxx
+   ↓
+14. 调用 git 打标签、发布
 ```
 
-**场景B: 启用 Superpowers 增强（复杂功能）**
+**场景B: 启用 Superpowers 增强（复杂功能，Token 优化版）**
 ```
 1. 产品经理交付PRD（含设计规范）和设计稿
    ↓
-2. 【启用 Superpowers】安装插件
+2. 审阅PRD，确定开发模块
+   ↓
+3. 【Token 优化】创建 Git Worktree 隔离环境
+   │   └── git worktree add ../worktrees/feature-complex develop
+   │   └── cd ../worktrees/feature-complex
+   ↓
+4. 【启用 Superpowers】安装插件
    │   └── /plugin install superpowers@claude-plugins-official
    ↓
-3. 【Superpowers: Brainstorm】需求澄清
-   │   └── 输入: "help me plan this feature"
+5. 【Superpowers: Brainstorm】需求澄清
+   │   └── > "help me plan this feature"
    │   └── 输出: 澄清后的问题列表
    ↓
-4. 【Superpowers: Spec】编写规格文档
+6. 【Superpowers: Spec】编写规格文档
    │   └── 输出: 详细规格说明
    ↓
-5. 【Superpowers: Plan】任务分解
+7. 【Superpowers: Plan】任务分解
    │   └── 输出: 2-5分钟粒度的任务列表
    ↓
-6. 审阅PRD + Superpowers Plan，输出技术方案
+8. 审阅PRD + Superpowers Plan，输出技术方案
    ↓
-7. 【Superpowers: TDD】测试驱动开发
+9. 【Token 优化】启动 Claude Code
+   │   └── cd ../worktrees/feature-complex && claude
+   │   └── > "实现用户认证模块，Superpowers Plan 已附"
+   ↓
+10. 【Superpowers: TDD】测试驱动开发
    │   ├── 编写失败测试（RED）
    │   ├── 实现代码通过测试（GREEN）
    │   └── 重构优化（REFACTOR）
    ↓
-8. 【日常开发】Claude Code / fullstack-developer 编码实现
-   ↓
-9. 【Superpowers: Review】代码审查
+11. 【Superpowers: Review】代码审查
    │   └── 检查规格符合性和代码质量
    ↓
-10. 修复问题 + 自测
+12. 修复问题 + 自测
    ↓
-11. 提交PR，调用 github 管理合并
+13. 提交PR，调用 github 管理合并
    ↓
-12. 调用 git 打标签、发布
+14. 清理 worktree
+   ↓
+15. 调用 git 打标签、发布
 ```
+
+**Token 优化关键点**:
+1. ✅ 使用 Git Worktree 隔离，限制代码上下文
+2. ✅ CLAUDE.md 架构文档由 Claude Code 自己读取
+3. ✅ 我只传递简洁任务描述（<100字），不传递完整上下文
+4. ✅ 按模块拆分项目，不加载无关代码
 
 **Superpowers 触发关键词**:
 - `"help me plan this feature"` → Brainstorm + Plan
