@@ -394,25 +394,45 @@ types:
 - "设计并实现订单系统的数据模型和API接口"
 ```
 
-**2. coding-agent（代码辅助）**
+**2. Claude Code（主力开发工具）**
 ```
-场景: 复杂算法实现、重构、Debug、特定模块优化
-调用: coding-agent skill
-输入: 详细的需求描述、现有代码、约束条件
+场景: 日常编码、重构、Debug、代码优化
+调用: claude CLI 工具
+输入: 需求描述、现有代码、约束条件
 输出: 代码实现、解释说明
 
-使用时机:
-- fullstack-developer 完成主体后的细节优化
-- 复杂业务逻辑的实现
-- 性能瓶颈的专项优化
+使用时机（方案A - 主要开发工具）:
+- 日常功能开发和调试
+- 代码重构和优化
+- Bug修复和代码审查
+- 单元测试编写
+
+启动方式:
+cd /path/to/project && claude
 
 示例任务:
+- "帮我实现用户登录功能，包含表单验证和错误处理"
 - "优化这个查询算法，从O(n²)降到O(n log n)"
 - "重构这个状态管理模块，解决内存泄漏"
 - "Debug: 这个API在高并发下偶发500错误"
 ```
 
-**3. flutter（跨端专项）**
+**3. coding-agent（备选工具）**
+```
+场景: Claude Code 无法处理的特定场景
+调用: coding-agent skill
+输入: 详细的需求描述、现有代码、约束条件
+输出: 代码实现、解释说明
+
+使用时机（备选）:
+- Claude Code 复杂场景补充
+- 特定算法的深度优化
+- 需要多工具协作时
+
+状态: 保留作为备选，Claude Code 为主力
+```
+
+**4. flutter（跨端专项）**
 ```
 场景: Flutter特定问题、平台适配、性能调优
 调用: flutter skill
@@ -425,21 +445,21 @@ types:
 
 ### 工程化技能
 
-**4. git（版本控制）**
+**5. git（版本控制）**
 ```
 场景: 分支管理、代码合并、版本发布
 调用: git skill
 用途: 解决冲突、回滚操作、标签管理
 ```
 
-**5. github（仓库管理）**
+**6. github（仓库管理）**
 ```
 场景: PR管理、Issue跟踪、CI/CD配置
 调用: github skill
 用途: 代码审查流程、自动化工作流
 ```
 
-**6. code-reviewer-pro（代码审查）**
+**7. code-reviewer-pro（代码审查）**
 ```
 场景: 代码质量检查、安全审查、重构建议
 调用: code-reviewer-pro skill
@@ -465,7 +485,7 @@ types:
 
 ### 设计实现技能（按需调用）
 
-**6. frontend-design-3（视觉效果实现）**
+**8. frontend-design-3（视觉效果实现）**
 ```
 场景: 实现产品经理指定的复杂UI视觉效果
 调用: frontend-design-3 skill
@@ -510,9 +530,10 @@ types:
 
 环节2.2 开发实现:
   ├── fullstack-developer → 主体功能开发（主力）
+  ├── Claude Code → 日常编码/调试（主力工具）
   ├── frontend-design-3 → 复杂视觉效果实现（按需）
   ├── flutter → Flutter专项优化（按需）
-  ├── coding-agent → 复杂逻辑/性能优化（按需）
+  ├── coding-agent → 复杂逻辑/性能优化（备选）
   └── 输出: 可运行代码
 
 环节2.3 代码审查（开发完成后）:
@@ -539,22 +560,25 @@ types:
    ↓
 4. 调用 fullstack-developer 实现主体功能
    ↓
-5. 【如需复杂UI效果】调用 frontend-design-3 实现视觉效果
+5. 【日常开发/调试】启动 Claude Code 进行代码开发
+   │   └── cd /project && claude
    ↓
-6. 【如需Flutter优化】调用 flutter 进行专项优化
+6. 【如需复杂UI效果】调用 frontend-design-3 实现视觉效果
    ↓
-7. 【如需代码审查】调用 code-reviewer-pro 进行质量检查
+7. 【如需Flutter优化】调用 flutter 进行专项优化
+   ↓
+8. 【如需代码审查】调用 code-reviewer-pro 进行质量检查
    │   ├── 安全审查: security 命令
    │   ├── 复杂度分析: complexity 命令
    │   └── 通用审查: review 命令
    ↓
-8. 修复审查发现的问题
+9. 修复审查发现的问题
    ↓
-9. 自测 + 编写单元测试
+10. 自测 + 编写单元测试
    ↓
-10. 提交PR，调用 github 管理合并
+11. 提交PR，调用 github 管理合并
    ↓
-11. 调用 git 打标签、发布
+12. 调用 git 打标签、发布
 ```
 
 ---
