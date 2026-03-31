@@ -505,6 +505,42 @@ cd /path/to/project && claude
 - "用 CSS 实现产品经理指定的渐变网格背景"
 ```
 
+### 增强开发流程技能（按需启用）
+
+**9. Superpowers（Claude Code 插件）**
+```
+场景: 需要强制执行规范开发流程时
+调用: Claude Code Superpowers 插件
+用途: 结构化开发工作流、TDD、系统性调试
+
+安装方式:
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+
+核心技能:
+- Brainstorm: 需求澄清，问关键问题
+- Spec: 编写详细规格文档
+- Plan: 任务分解（2-5分钟粒度）
+- TDD: 先写测试，再写实现（RED-GREEN-REFACTOR）
+- Debug: 系统性调试
+- Review: 代码审查
+- Git Worktree: 隔离开发分支
+
+使用时机（按需启用）:
+- 复杂功能需要严格流程控制时
+- 需要强制执行 TDD 时
+- 系统性调试复杂问题时
+- 需要规范的任务分解和管理时
+
+启用方式:
+在 Claude Code 中输入自然语言触发:
+- "help me plan this feature" → 启动 Brainstorm + Plan
+- "let's debug this issue" → 启动 Debug 技能
+- "implement this with TDD" → 启动 TDD 流程
+
+⚠️ 注意: Superpowers 是可选增强工具，不是必须。当需要规范流程时启用，日常开发使用标准 Claude Code 即可。
+```
+
 ---
 
 ## 技能分工原则
@@ -528,13 +564,22 @@ cd /path/to/project && claude
   ├── fullstack-developer → 技术架构设计
   └── 输出: 技术方案文档（不含设计决策）
 
-环节2.2 开发实现:
+环节2.2 开发实现（标准流程）:
   ├── fullstack-developer → 主体功能开发（主力）
   ├── Claude Code → 日常编码/调试（主力工具）
   ├── frontend-design-3 → 复杂视觉效果实现（按需）
   ├── flutter → Flutter专项优化（按需）
   ├── coding-agent → 复杂逻辑/性能优化（备选）
   └── 输出: 可运行代码
+
+环节2.2 开发实现（启用 Superpowers 增强）:
+  ├── 【启用 Superpowers】→ 规范开发流程
+  │   ├── Brainstorm → 需求澄清
+  │   ├── Plan → 任务分解（2-5分钟粒度）
+  │   └── TDD → 测试驱动开发
+  ├── fullstack-developer → 主体功能开发
+  ├── Claude Code → 代码实现
+  └── 输出: 可运行代码 + 完整测试
 
 环节2.3 代码审查（开发完成后）:
   ├── code-reviewer-pro → 代码质量/安全检查（按需）
@@ -548,9 +593,16 @@ cd /path/to/project && claude
   └── github → PR合并、自动化部署
 ```
 
+**Superpowers 启用判断**:
+- ✅ 复杂功能（>3天开发时间）
+- ✅ 需要强制执行 TDD
+- ✅ 系统性调试复杂问题
+- ❌ 简单功能（<1天开发时间）
+- ❌ 紧急热修复
+
 ### 技能调用流程示例
 
-**场景: 开始一个新功能开发**
+**场景A: 标准开发流程（简单功能）**
 ```
 1. 产品经理交付PRD（含设计规范）和设计稿
    ↓
@@ -580,6 +632,48 @@ cd /path/to/project && claude
    ↓
 12. 调用 git 打标签、发布
 ```
+
+**场景B: 启用 Superpowers 增强（复杂功能）**
+```
+1. 产品经理交付PRD（含设计规范）和设计稿
+   ↓
+2. 【启用 Superpowers】安装插件
+   │   └── /plugin install superpowers@claude-plugins-official
+   ↓
+3. 【Superpowers: Brainstorm】需求澄清
+   │   └── 输入: "help me plan this feature"
+   │   └── 输出: 澄清后的问题列表
+   ↓
+4. 【Superpowers: Spec】编写规格文档
+   │   └── 输出: 详细规格说明
+   ↓
+5. 【Superpowers: Plan】任务分解
+   │   └── 输出: 2-5分钟粒度的任务列表
+   ↓
+6. 审阅PRD + Superpowers Plan，输出技术方案
+   ↓
+7. 【Superpowers: TDD】测试驱动开发
+   │   ├── 编写失败测试（RED）
+   │   ├── 实现代码通过测试（GREEN）
+   │   └── 重构优化（REFACTOR）
+   ↓
+8. 【日常开发】Claude Code / fullstack-developer 编码实现
+   ↓
+9. 【Superpowers: Review】代码审查
+   │   └── 检查规格符合性和代码质量
+   ↓
+10. 修复问题 + 自测
+   ↓
+11. 提交PR，调用 github 管理合并
+   ↓
+12. 调用 git 打标签、发布
+```
+
+**Superpowers 触发关键词**:
+- `"help me plan this feature"` → Brainstorm + Plan
+- `"let's debug this issue"` → Debug 技能
+- `"implement this with TDD"` → TDD 流程
+- `"review the code"` → Review 技能
 
 ---
 
