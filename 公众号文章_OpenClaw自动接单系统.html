@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+        }
+        .article {
+            padding: 20px 16px;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 15px;
+        }
+        p {
+            margin: 16px 0;
+            font-size: 16px;
+        }
+        .emoji-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 28px 0 12px 0;
+        }
+        .screenshot-placeholder {
+            background: #f5f5f5;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            color: #333;
+            overflow-x: auto;
+            border-radius: 0 4px 4px 0;
+        }
+        .tip-box {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .warning-box {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .result-box {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .result-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #52c41a;
+            display: block;
+            margin: 8px 0;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .author {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+        }
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            color: #ddd;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="article">
+        <div class="title">我用OpenClaw搭建24小时自动接单系统，一周省出20小时</div>
+        <div class="subtitle">AI一人公司实战日记 · 第1期</div>
+
+        <div class="highlight-box">
+            上周我算了一笔账，每天花2小时处理重复工作，一年就是700+小时。相当于整整29天，躺在键盘上睡觉。🤯
+        </div>
+
+        <p>兄弟们，不瞒你们说。</p>
+        
+        <p>我之前每天的工作状态是这样的：</p>
+
+        <p>睁眼→找热点→写日报→反复检查→手动推送→开始真正的工作。</p>
+
+        <p>光这个流程就要吃掉我2小时。</p>
+
+        <p>关键是，这些事不需要动脑子，但需要我亲自干。</p>
+
+        <p>就像让大学生去搬砖——能搬，但浪费。</p>
+
+        <div class="divider">✦ ✦ ✦</div>
+
+        <div class="emoji-title">🔧 开始动手：从0搭建自动系统</div>
+
+        <p>上周我决定动手。</p>
+
+        <p>用OpenClaw搭一套「24小时自动接单系统」。我的目标很简单：</p>
+
+        <div class="tip-box">
+            <strong>核心需求：</strong><br>
+            每天7:30自动搜集AI行业热点，7:40推送到微信群。我只需要花5分钟看一眼，确认没问题就发。
+        </div>
+
+        <p>听起来简单对吧？</p>
+
+        <p>但真做起来，坑一个接一个。</p>
+
+        <div class="emoji-title">📋 系统架构拆解</div>
+
+        <p>先给大家看下我最终跑通的流程：</p>
+
+        <div class="code-block">
+定时任务触发 → kimi_search搜热点 → 整理日报内容 → 微信消息推送 → 人工确认发送
+        </div>
+
+        <p>四个环节，三个工具。</p>
+
+        <p><strong>第一步：定时任务</strong></p>
+
+        <p>OpenClaw的cron功能，设置每天7:30执行。这一步最基础，但也最容易翻车。</p>
+
+        <div class="screenshot-placeholder">
+            【截图占位：cron定时任务配置界面】<br>
+            <small>刘总请替换为实际配置截图</small>
+        </div>
+
+        <p><strong>第二步：kimi_search搜热点</strong></p>
+
+        <p>我写了一组搜索词：AI最新动态、大模型发布、AI产品更新...</p>
+
+        <p>kimi_search每次抓5条结果，够用了。</p>
+
+        <div class="screenshot-placeholder">
+            【截图占位：kimi_search搜索结果示例】<br>
+            <small>刘总请替换为实际搜索结果截图</small>
+        </div>
+
+        <p><strong>第三步：整理日报</strong></p>
+
+        <p>这个我用的OpenClaw的子代理功能。</p>
+
+        <p>主会话只负责调度，子代理专门写文案。分工明确，互不干扰。</p>
+
+        <div class="screenshot-placeholder">
+            【截图占位：子代理生成的日报内容示例】<br>
+            <small>刘总请替换为实际日报截图</small>
+        </div>
+
+        <p><strong>第四步：微信推送</strong></p>
+
+        <p>推到企业微信群，我每天早上瞄一眼，没问题就转发。</p>
+
+        <p>有问题？改两行文字的事儿，5分钟搞定。</p>
+
+        <div class="divider">✦ ✦ ✦</div>
+
+        <div class="emoji-title">💣 踩坑实录：我遇到的三个大坑</div>
+
+        <p>现在说点真实的。</p>
+
+        <p>这套系统我断断续续调了3天。期间无数次想放弃，真的。</p>
+
+        <p><strong>坑1：定时任务超时问题</strong></p>
+
+        <p>第一次跑定时任务，直接报错超时。</p>
+
+        <p>我一开始以为是网络问题，后来查文档才发现：kimi_search本身就需要时间，加上整理文案，整个流程跑完可能要2-3分钟。</p>
+
+        <div class="warning-box">
+            <strong>解决方案：</strong><br>
+            在cron配置里增加timeout参数，设置5分钟超时。同时把搜索和整理拆成两个步骤，减少单次执行时间。
+        </div>
+
+        <p><strong>坑2：子代理 vs 主会话的坑</strong></p>
+
+        <p>这个坑我卡了整整一天。</p>
+
+        <p>一开始我把所有逻辑都写在主会话里，结果历史消息越堆越多，上下文越来越乱。</p>
+
+        <p>后来我改用子代理专门处理日报生成，主会话只负责触发和推送。</p>
+
+        <p>效果好多了。</p>
+
+        <div class="warning-box">
+            <strong>解决方案：</strong><br>
+            子代理sessionTarget设为isolated，每次重新跑，不累积历史。主会话保持轻量，只做调度。
+        </div>
+
+        <div class="screenshot-placeholder">
+            【截图占位：子代理配置代码片段】<br>
+            <small>刘总请替换为实际配置截图</small>
+        </div>
+
+        <p><strong>坑3：封面图media_id过期问题</strong></p>
+
+        <p>这个坑最隐蔽。</p>
+
+        <p>我做公众号推送的时候，封面图的media_id有效期只有3天。</p>
+
+        <p>一开始没注意，结果第4天推送直接失败，封面裂了。</p>
+
+        <div class="warning-box">
+            <strong>解决方案：</strong><br>
+            在推送流程里加一步：先检查media_id是否过期，过期了重新上传获取新的media_id。或者干脆每次推送前都重新上传封面图。
+        </div>
+
+        <p>说实话，这些问题文档里都有，但不自己踩一遍，根本记不住。</p>
+
+        <div class="divider">✦ ✦ ✦</div>
+
+        <div class="emoji-title">📊 结果：一周省出20小时</div>
+
+        <p>现在系统跑了一周，数据如下：</p>
+
+        <div class="result-box">
+            <div style="display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap;">
+                <div style="margin: 10px;">
+                    <span class="result-number">7:30</span>
+                    <span style="color: #666;">自动搜热点</span>
+                </div>
+                <div style="margin: 10px;">
+                    <span class="result-number">7:40</span>
+                    <span style="color: #666;">推送日报</span>
+                </div>
+                <div style="margin: 10px;">
+                    <span class="result-number">5min</span>
+                    <span style="color: #666;">人工审核</span>
+                </div>
+                <div style="margin: 10px;">
+                    <span class="result-number">20h</span>
+                    <span style="color: #666;">每周节省</span>
+                </div>
+            </div>
+        </div>
+
+        <p>以前每天2小时，现在每天5分钟。</p>
+
+        <p>一周下来，省出整整20小时。</p>
+
+        <p>这20小时我可以写深度文章、可以研究新工具、可以早点下班陪家人。</p>
+
+        <p>值不值？太值了。</p>
+
+        <div class="screenshot-placeholder">
+            【截图占位：微信群自动推送的消息截图】<br>
+            <small>刘总请替换为实际推送效果截图</small>
+        </div>
+
+        <div class="divider">✦ ✦ ✦</div>
+
+        <div class="emoji-title">🎣 下期预告 + 互动</div>
+
+        <div class="cta-box">
+            <p style="margin: 0; font-size: 16px; line-height: 1.6;">
+                📚 <strong>下期分享这套系统的完整搭建教程</strong><br>
+                <span style="font-size: 14px; opacity: 0.9;">从0到1，每一步都有截图和代码</span>
+            </p>
+        </div>
+
+        <p>最后想问问大家：</p>
+
+        <p><strong>你最想用AI自动化什么工作？</strong></p>
+
+        <p>是每天重复的报表？</p>
+
+        <p>是无休止的客户回复？</p>
+
+        <p>还是跟我一样，每天机械的热点搜集？</p>
+
+        <p>评论区聊聊，说不定我能给你点思路。</p>
+
+        <div class="divider">✦ ✦ ✦</div>
+
+        <p>如果你也在用OpenClaw做自动化，欢迎交流。</p>
+
+        <p>咱们一起把重复的事交给AI，把时间留给创造。</p>
+
+        <div class="author">
+            作者：MickJagger<br>
+            INSIGHT AI STUDIO
+        </div>
+    </div>
+</body>
+</html>

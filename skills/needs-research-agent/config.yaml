@@ -1,0 +1,107 @@
+# 需求调研Agent配置文件
+
+# 调研平台配置
+platforms:
+  - name: reddit
+    enabled: true
+    keywords:
+      - "app idea"
+      - "looking for app"
+      - "wish there was"
+      - "need an app"
+      - "side project"
+    subreddits:
+      - appideas
+      - sideproject
+      - entrepreneur
+      - startups
+
+  - name: xiaohongshu
+    enabled: true
+    keywords:
+      - "求推荐"
+      - "有没有app"
+      - "想找个工具"
+      - "app推荐"
+      - "小众app"
+
+  - name: jike
+    enabled: true
+    keywords:
+      - "效率工具"
+      - "求推荐"
+      - "独立开发者"
+      - "app开发"
+
+  - name: zhihu
+    enabled: true
+    keywords:
+      - "有什么好的app"
+      - "推荐个工具"
+      - "软件推荐"
+
+# 报告配置
+report:
+  frequency: weekly  # weekly/daily
+  day: monday        # 生成报告的星期几
+  time: "10:00"      # 生成报告的时间
+  min_mentions: 3    # 最少提及次数才收录
+  max_pain_points: 10  # 报告最多显示的痛点数量
+
+# 输出配置
+output:
+  format: markdown
+  path: "./reports/"
+  # webhook配置（可选）- 用于推送到飞书/钉钉
+  webhook: ""
+  webhook_type: "feishu"  # feishu/dingtalk
+
+# 关键词分类（用于自动归类）
+categories:
+  情绪管理:
+    - calm
+    - stress
+    - anxiety
+    - mood
+    - 减压
+    - 情绪
+    - 心情
+    - 压力
+    - 焦虑
+    - 冥想
+    
+  手帐笔记:
+    - journal
+    - journaling
+    - hand account
+    - 手帐
+    - 笔记
+    - 记录
+    - 日记
+    - planner
+    
+  物品管理:
+    - track
+    - stuff
+    - lasts
+    - 物品
+    - 寿命
+    - 追踪
+    - 极简
+    - 断舍离
+    
+  效率工具:
+    - productivity
+    - efficient
+    - 效率
+    - 工具
+    - 自动化
+    - 提醒
+    
+  健康管理:
+    - health
+    - fitness
+    - 健康
+    - 运动
+    - 睡眠
+    - 饮食

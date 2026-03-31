@@ -1,0 +1,388 @@
+<!-- 
+微信公众号文章 - 不要使用 <html><head><body> 标签！
+直接使用 <div> 开始
+-->
+
+<!-- 头部Banner -->
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px; font-weight: 600;">🛠️ 实战实录</h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">服务器运维太麻烦？我用 Claude Code 搞定了 LanceDB 记忆系统搭建</p>
+    <p style="margin: 5px 0 0 0; opacity: 0.7; font-size: 13px;">MickJagger | 2026年3月12日</p>
+</div>
+
+<!-- 导语 -->
+<div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #9c27b0;">
+    <p style="margin: 0; color: #4a148c; font-size: 15px; line-height: 1.7;">
+        上一篇讲了为什么选择云服务器部署 OpenClaw。但上了云之后，第一个问题来了：AI 助手记不住我说过的话。折腾了 3 天，换了 3 种记忆方案，最后发现——服务器运维太麻烦了，直到我把 Claude Code 当成了 DevOps 助手。
+    </p>
+</div>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">一、默认记忆的痛点：AI 为什么总是"失忆"？</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    刚开始用 OpenClaw 的时候，我觉得默认的 memory-core 应该够用了。原理听起来也简单：</p>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 0; color: #555; font-size: 15px; line-height: 1.7;">
+        <strong>memory-core 原理：</strong><br>
+        • 用 Markdown 文件存储记忆片段<br>
+        • SQLite 做索引加速查询<br>
+        • 提供 <code>memory_search</code> 和 <code>memory_store</code> 两个工具函数
+    </p>
+</div>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    但用了几天，发现问题很严重：</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>1. 没有自动注入上下文</strong><br>
+    每次新会话，AI 完全不知道之前聊过什么。我得手动告诉它"去搜索记忆"，它才会去查。</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>2. 依赖模型的"自觉性"</strong><br>
+    memory-core 需要模型主动调用 <code>memory_store</code> 来保存重要信息。但问题是——模型经常"忘记"要存。聊完一整个会话，什么都没记下来。</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>3. 语义搜索能力弱</strong><br>
+    基于关键词匹配，而不是语义理解。我问"我之前说的邮箱是什么"，它可能搜不到，因为我当时说的是"我的邮箱是..."</p>
+
+<div style="background: #ffebee; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #c62828;">
+    <p style="margin: 0; color: #c62828; font-size: 15px; line-height: 1.7;">
+        <strong>核心痛点：</strong>跨会话失忆。昨天聊的内容，今天完全没印象。这不是我想要的"长期记忆"。
+    </p>
+</div>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">二、三种记忆方案对比：为什么最终选了 LanceDB？</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    为了解决记忆问题，我调研了市面上主流的三种方案，做了一个深度对比：</p>
+
+<h3 style="color: #e65100; margin-top: 0; font-size: 18px;">方案一：Mem0</h3>
+
+<div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <p style="margin: 0; color: #5d4037; font-size: 15px; line-height: 1.7;">
+        <strong>优点：</strong>云端服务成熟、自动捕获记忆、生态完善<br><br>
+        <strong>缺点：</strong><br>
+        • 需要稳定的国际网络（国内服务器访问不稳定）<br>
+        • API 调用有成本<br>
+        • 配置相对复杂，需要 API Key<br><br>
+        <strong>我的评估：❌ 放弃</strong><br>
+        国内服务器网络环境不稳定，不想依赖外部 API。
+    </p>
+</div>
+
+<h3 style="color: #e65100; margin-top: 0; font-size: 18px;">方案二：QMD（Memory-Core 升级版）</h3>
+
+<div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <p style="margin: 0; color: #5d4037; font-size: 15px; line-height: 1.7;">
+        <strong>优点：</strong>OpenClaw 原生支持、纯本地、透明可编辑<br><br>
+        <strong>缺点：</strong><br>
+        • 仍然需要手动调用 <code>memory_search</code><br>
+        • 模型得"记得"保存信息<br>
+        • 内存占用较高（对我的 2核4G 服务器来说可能吃力）<br><br>
+        <strong>我的评估：❌ 放弃</strong><br>
+        2核4G 配置跑 QMD 可能会内存吃紧，而且自动记忆的问题没解决。
+    </p>
+</div>
+
+<h3 style="color: #2e7d32; margin-top: 0; font-size: 18px;">方案三：LanceDB ✅</h3>
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        <strong>优点：</strong><br>
+        • <strong>Auto-Recall</strong>：自动注入相关记忆到上下文<br>
+        • <strong>Auto-Capture</strong>：自动捕获并保存重要信息<br>
+        • <strong>向量语义搜索</strong>：理解语义，不只是关键词匹配<br>
+        • <strong>官方唯一认可</strong>：OpenClaw 唯一内置推荐的三方向量库<br>
+        • <strong>内存可控</strong>：适合 2核4G 配置（我的服务器刚好是这个配置）<br><br>
+        <strong>缺点：</strong>配置复杂、需要本地部署 Embedding 模型<br><br>
+        <strong>我的评估：✅ 选择</strong><br>
+        虽然配置麻烦，但功能完全符合需求，而且官方认可。
+    </p>
+</div>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">选择 LanceDB 的两大核心原因</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>原因 1：服务器配置限制</strong><br>
+    我的服务器只有 2核4G，跑 QMD 可能会内存吃紧。LanceDB 更轻量，向量检索效率高，适合小配置服务器。</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>原因 2：官方唯一认可</strong><br>
+    翻看 OpenClaw 官方文档，LanceDB 是唯一被内置推荐的三方向量数据库。这意味着更好的兼容性和长期维护保障。</p>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">三、最终方案落地：Docker + Ollama + LanceDB</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    确定了 LanceDB 方案，下一步是技术选型。我需要解决一个问题：国内服务器无法下载 HuggingFace 的 Embedding 模型。</p>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">技术栈架构</h3>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: monospace; font-size: 14px;">
+    ┌─────────────────────────────────────────┐<br>
+    │           OpenClaw Gateway              │<br>
+    │              (18789端口)                 │<br>
+    └─────────────────┬───────────────────────┘<br>
+                      │<br>
+    ┌─────────────────▼───────────────────────┐<br>
+    │         LanceDB Memory Plugin           │<br>
+    │      (Auto-Recall + Auto-Capture)       │<br>
+    └─────────────────┬───────────────────────┘<br>
+                      │<br>
+    ┌─────────────────▼───────────────────────┐<br>
+    │          Ollama (Docker)                │<br>
+    │      (nomic-embed-text模型)              │<br>
+    │   - 文本向量化 (768维)                   │<br>
+    │   - 语义理解                             │<br>
+    └─────────────────────────────────────────┘
+</div>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">为什么选择 nomic-embed-text？</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    • <strong>轻量级</strong>：768 维向量，适合 2核4G 配置<br>
+    • <strong>本地部署</strong>：通过 Ollama 运行，无需外网下载<br>
+    • <strong>开源免费</strong>：无 API 调用成本<br>
+    • <strong>效果够用</strong>：与 LanceDB 配合，语义检索效果良好</p>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">部署步骤（理想版 vs 现实版）</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>理想版（你以为的）：</strong><br>
+    1. 安装 LanceDB 插件<br>
+    2. 配置 Ollama<br>
+    3. 重启 OpenClaw<br>
+    4. 记忆功能正常<br>
+    <em>耗时：10 分钟</em></p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>现实版（我遇到的）：</strong><br>
+    1. LanceDB 插件报错：找不到 <code>dist/index.js</code><br>
+    2. 发现 TypeScript 代码未编译<br>
+    3. 编译报错：<code>Pipeline</code> 类型不存在<br>
+    4. 发现 <code>registerTool</code> API 调用方式错误<br>
+    5. 手动改代码，vim 太难用<br>
+    6. 不同环境命令不适配（Ubuntu vs CentOS）<br>
+    <em>耗时：3 小时，还没搞定</em></p>
+
+<div style="background: #ffebee; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #c62828;">
+    <p style="margin: 0; color: #c62828; font-size: 15px; line-height: 1.7;">
+        <strong>当时的心情：</strong>我只是想装个记忆插件，为什么要让我学 Linux 运维？
+    </p>
+</div>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">四、灵光一现：用 Claude Code 当运维助手</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    折腾了 3 小时，我突然想到一个问题：</p>
+
+<div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #1976d2;">
+    <p style="margin: 0; color: #0d47a1; font-size: 15px; line-height: 1.7;">
+        💡 <strong>灵光一现：</strong><br>
+        之前用 Claude Code 写代码，它能读取我本地项目文件、改代码、跑测试。<br>
+        服务器上的文件，不也是文件吗？<br>
+        如果 Claude Code 通过 SSH 连到服务器，不就能像操作本地一样操作云服务器了吗？
+    </p>
+</div>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">尝试：让 Claude Code 接管服务器运维</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    我在服务器上装了 Claude Code CLI，然后试着对它说：</p>
+
+<!-- 📱【聊天记录截图位置】
+- 场景：向 Claude Code 描述问题
+- 建议截取：我和 Claude Code 对话修复插件的过程
+- 目的：体现真实的协作过程
+-->
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: monospace; font-size: 14px;">
+    <p style="margin: 0 0 10px 0; color: #333;"><strong>我：</strong>LanceDB 插件报错，说找不到 dist/index.js，帮我修复。</p>
+    <p style="margin: 0; color: #2e7d32;"><strong>Claude Code：</strong><br>
+    看了源码，发现几个问题：<br>
+    1. TypeScript 代码未编译，缺少 tsconfig.json<br>
+    2. Pipeline 类型定义错误，应该是 FeatureExtractionPipeline<br>
+    3. registerTool API 调用方式不对<br><br>
+    我来修复：<br>
+    [自动创建 tsconfig.json]<br>
+    [自动修复类型定义]<br>
+    [自动修复 API 调用]<br>
+    [运行 npm run build 编译]<br>
+    [验证插件加载成功]<br><br>
+    已修复，插件现在可以正常加载了。
+    </p>
+</div>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    全程 10 分钟，我之前手动搞了 3 小时没搞定的问题， Claude Code 自动解决了。</p>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">五、Claude Code 解决的实际问题</h2>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">问题 1：LanceDB 插件代码修复</h3>
+
+<table style="width:100%; border-collapse:collapse; margin: 20px 0; font-size: 14px;">
+    <tr style="background: #f8f9fa;">
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">步骤</th>
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">手动操作</th>
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">Claude Code</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">诊断问题</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">看报错 → 查文档 → 猜原因</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">直接分析代码，定位问题</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">修复代码</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">vim 编辑，esc 和 :wq 总按错</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">自动生成修复后的代码</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">编译验证</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">手动运行命令，报错再改</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">自动编译，出错自动修复</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">耗时</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">3 小时</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">10 分钟</td>
+    </tr>
+</table>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">问题 2：复杂配置生成</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>场景：</strong>写 systemd 服务文件，需要配置环境变量、自动重启策略、日志轮转。</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>以前：</strong>查 man page → 复制模板 → 改参数 → 试错 → 再查文档。<br>
+    <strong>现在：</strong>告诉 Claude "帮我写个 OpenClaw 的 systemd 服务，要自动重启、记录日志"，它直接生成完整配置，还解释每个参数的含义。</p>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">问题 3：跨环境命令适配</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>场景：</strong>教程里写的是 Ubuntu 的 <code>apt install</code>，我的是 CentOS，怎么对应？</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>以前：</strong>Google 搜索 "apt vs yum 命令对照表"，手动转换。<br>
+    <strong>现在：</strong>问 Claude "我在 CentOS 上，这个 Ubuntu 命令怎么对应？"，它自动识别系统类型，给出对应命令，还解释差异。</p>
+
+<h3 style="color: #667eea; margin-top: 0; font-size: 18px;">问题 4：操作记忆与文档</h3>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>场景：</strong>昨天刚改好的配置，今天忘了怎么改的。</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    <strong>以前：</strong>自己写运维笔记，常常忘记更新，下次还得重新摸索。<br>
+    <strong>现在：</strong>Claude Code 自动记录每次操作，下次直接问"上次怎么改的 LanceDB 配置？"，它就能召回之前的操作记录。</p>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">六、核心转变：从"执行命令"到"描述意图"</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    用了 Claude Code 之后，我的服务器运维 workflow 发生了根本性的变化：</p>
+
+<table style="width:100%; border-collapse:collapse; margin: 20px 0; font-size: 14px;">
+    <tr style="background: #f8f9fa;">
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">场景</th>
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">以前（手动运维）</th>
+        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #667eea;">现在（Claude Code）</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">改配置</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">查文档 + 手动编辑 + 试错</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">描述需求，自动生成</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">排故障</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">看日志 + Google 搜索</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">直接问"为什么报错"</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">跨环境</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">查发行版差异文档</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">Claude 自动适配</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">知识沉淀</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">自己写文档（常忘）</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">自动记录，对话召回</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">平均耗时</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">2 小时</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; color: #2e7d32;">10 分钟</td>
+    </tr>
+</table>
+
+<div style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); padding: 20px; border-radius: 10px; margin: 30px 0; border-left: 4px solid #ff9800;">
+    <h3 style="color: #e65100; margin-top: 0; font-size: 18px;">💬 MickJagger 点评</h3>
+    <p style="margin: 0; color: #5d4037; font-size: 15px; line-height: 1.7; font-style: italic;">
+        以前我觉得服务器运维是个技术活，得先学 Linux、学 vim、学 systemd。用了 Claude Code 之后才发现，其实我只是想把配置改对、把服务跑起来。从"执行命令"到"描述意图"，这不仅是效率的提升，更是思维方式的转变。Claude Code 不只是编程助手，它是真正的 DevOps 助手。
+    </p>
+</div>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">七、效果验证：记忆系统跑起来了</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    现在，我的 OpenClaw 记忆系统配置如下：</p>
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        <strong>✅ 记忆存储测试通过</strong><br>
+        我让 AI 记住"我的邮箱是 772076668@qq.com"，下次问"我的邮箱是什么"，它能准确回答。
+    </p>
+</div>
+
+<!-- 📱【聊天记录截图位置】
+- 场景：测试记忆存储功能
+- 建议截取：我与 AI 对话，询问邮箱的对话记录
+- 目的：展示记忆功能实际效果
+-->
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        <strong>✅ 跨会话上下文保持</strong><br>
+        昨天聊的 OpenClaw 部署方案，今天新会话它还记得我之前选了云服务器 + KimiClaw。
+    </p>
+</div>
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        <strong>✅ Auto-Recall 自动注入</strong><br>
+        新会话开始时，自动搜索相关记忆并注入上下文，不用手动提醒。
+    </p>
+</div>
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        <strong>✅ 运维效率提升 10 倍</strong><br>
+        以前改个配置 2 小时，现在 10 分钟搞定。Claude Code 承担了所有的"脏活累活"。
+    </p>
+</div>
+
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">八、总结：云服务器 + LanceDB + Claude Code = 完整方案</h2>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    回顾这 3 天的折腾历程：</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    • <strong>云服务器</strong>解决了 24 小时在线和成本问题<br>
+    • <strong>LanceDB</strong>解决了长期记忆和语义检索问题<br>
+    • <strong>Claude Code</strong>解决了服务器运维的复杂度问题</p>
+
+<p style="margin: 16px 0; color: #333; line-height: 1.8;">
+    这三者组合，构成了我在国内网络环境下的 OpenClaw 最优解。不需要高配 Mac，不需要专业运维技能，只需要月租几十块的云服务器 + 正确的工具选择。</p>
+
+<!-- 结尾互动 -->
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center; border-left: 4px solid #4caf50;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">
+        👇<br><strong>你在服务器运维上踩过什么坑？用过 Claude Code 吗？</strong><br>在评论区聊聊你的经验 💬
+    </p>
+</div>
+
+<!-- 数据来源 -->
+<div style="border-top: 1px solid #e0e0e0; padding-top: 20px; margin-top: 30px; text-align: center;">
+    <p style="color: #999; font-size: 12px; margin: 0;">
+        📌 基于真实折腾经历整理<br>
+        MickJagger · 洞察出品
+    </p>
+</div>

@@ -1,0 +1,21 @@
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "SearXNG"
+
+server:
+  bind_address: "0.0.0.0"
+  port: 8080
+  secret_key: "a8f5d2e9b1c4g7h0j3k6m9n2p5q8r1t4u7w0x3z6a9d2g5h8j0k3"
+
+search:
+  formats:
+    - html
+    - json
+
+outgoing:
+  request_timeout: 10.0
+  proxies:
+    all://:
+      - http://127.0.0.1:7890

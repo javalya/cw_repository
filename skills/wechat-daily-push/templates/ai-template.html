@@ -1,0 +1,48 @@
+<!-- 
+微信公众号HTML模板 - 重要：不要使用<html><head><body>标签！
+直接使用<div>开始，否则微信公众号编辑器会过滤样式。
+-->
+
+<!-- 头部Banner -->
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 600;">🤖 {{TITLE}}</h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">{{DATE}} {{WEEKDAY}}</p>
+</div>
+
+<!-- 导语 -->
+<div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #9c27b0;">
+    <p style="margin: 0; color: #4a148c; font-size: 15px; line-height: 1.7;">{{LEAD}}</p>
+</div>
+
+<!-- 核心资讯 -->
+<h2 style="color: #667eea; margin: 30px 0 20px 0; font-size: 22px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">🚀 核心资讯</h2>
+
+{{NEWS_ITEMS}}
+
+<!-- MickJagger点评 -->
+<div style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); padding: 20px; border-radius: 10px; margin: 30px 0; border-left: 4px solid #ff9800;">
+    <h3 style="color: #e65100; margin-top: 0; font-size: 18px;">💬 MickJagger点评</h3>
+    <p style="margin: 0; color: #5d4037; font-size: 15px; line-height: 1.7; font-style: italic;">{{COMMENT}}</p>
+</div>
+
+<!-- 结尾互动 -->
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center; border-left: 4px solid #4caf50;">
+    <p style="margin: 0; color: #2e7d32; font-size: 15px; line-height: 1.7;">{{ENDING}}</p>
+</div>
+
+<!-- 数据来源 -->
+<div style="border-top: 1px solid #e0e0e0; padding-top: 20px; margin-top: 30px; text-align: center;">
+    <p style="color: #999; font-size: 12px; margin: 0;">
+        📌 数据来源：{{DATA_SOURCES}}<br>
+        本日报由AI自动生成
+    </p>
+</div>
+
+<!-- 
+单个新闻条目模板：
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <h3 style="color: #667eea; margin-top: 0; font-size: 17px;">{{INDEX}}. {{NEWS_TITLE}}</h3>
+    <p style="margin: 10px 0; color: #333; line-height: 1.7;">{{NEWS_CONTENT}}</p>
+    <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">来源：{{NEWS_SOURCE}}</p>
+</div>
+-->

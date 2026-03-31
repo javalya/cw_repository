@@ -1,0 +1,37 @@
+{
+  "date": "2026-03-04",
+  "news_count": 5,
+  "news_items": [
+    {
+      "title": "千问App月活突破2亿，增速全球第一",
+      "category": "AI科技",
+      "impact": "positive",
+      "timestamp": "2026-03-04T18:02:07.722019"
+    },
+    {
+      "title": "美股三大指数集体收跌，纳指跌1.02%",
+      "category": "美股",
+      "impact": "negative",
+      "timestamp": "2026-03-04T18:02:07.722029"
+    },
+    {
+      "title": "黄金价格暴跌近5%，避险资产受挫",
+      "category": "大宗商品",
+      "impact": "negative",
+      "timestamp": "2026-03-04T18:02:07.722031"
+    },
+    {
+      "title": "全国政协十四届四次会议今日开幕",
+      "category": "政策",
+      "impact": "neutral",
+      "timestamp": "2026-03-04T18:02:07.722033"
+    },
+    {
+      "title": "2月A股新开户252.3万户，环比下降49%",
+      "category": "A股",
+      "impact": "neutral",
+      "timestamp": "2026-03-04T18:02:07.722034"
+    }
+  ],
+  "generated_at": "2026-03-04T18:02:07.722068"
+}

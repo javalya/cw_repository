@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter": {
+      "name": "Flutter",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=flutter",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "ui-ux-pro-max-2": {
+      "name": "Ui Ux Pro Max",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ui-ux-pro-max-2",
+      "source": "skillhub",
+      "version": "0.1.0"
+    },
+    "flutter-appstore-doc-ui-kit": {
+      "name": "Flutter AppStore Doc UI Kit",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=flutter-appstore-doc-ui-kit",
+      "source": "skillhub",
+      "version": "0.1.3"
+    },
+    "proactive-agent": {
+      "name": "Proactive Agent",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=proactive-agent",
+      "source": "skillhub",
+      "version": "3.1.0"
+    },
+    "self-improving-agent": {
+      "name": "self-improving-agent",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=self-improving-agent",
+      "source": "skillhub",
+      "version": "1.0.11"
+    },
+    "frontend-design-3": {
+      "name": "Frontend Design",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=frontend-design-3",
+      "source": "skillhub",
+      "version": "0.1.0"
+    },
+    "tmux": {
+      "name": "Tmux",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=tmux",
+      "source": "skillhub",
+      "version": "1.0.0"
+    }
+  }
+}
